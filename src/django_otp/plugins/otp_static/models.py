@@ -1,6 +1,8 @@
 from base64 import b32encode
 from os import urandom
 
+from fernet_fields import EncryptedCharField
+
 from django.conf import settings
 from django.db import models
 
@@ -30,7 +32,13 @@ class StaticDevice(ThrottlingMixin, Device):
     def verify_token(self, token):
         verify_allowed, _ = self.verify_is_allowed()
         if verify_allowed:
-            match = self.token_set.filter(token=token).first()
+            # EncryptedCharField does not support these kind of lookups:
+            # >>> match = self.token_set.filter(token=token).first()
+            match = None
+            for static_token in self.token_set.iterator():
+                if static_token.token == token:
+                    match = static_token
+                    break
             if match is not None:
                 match.delete()
                 self.throttle_reset()
@@ -55,7 +63,7 @@ class StaticToken(models.Model):
         *CharField*: A random string up to 16 characters.
     """
     device = models.ForeignKey(StaticDevice, related_name='token_set', on_delete=models.CASCADE)
-    token = models.CharField(max_length=16, db_index=True)
+    token = EncryptedCharField(max_length=250)
 
     @staticmethod
     def random_token():

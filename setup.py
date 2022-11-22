@@ -33,6 +33,7 @@ setup(
 
     install_requires=[
         'django >= 2.2',
+         'djfernet >= 0.8.1',
     ],
     extras_require={
         'qrcode': ['qrcode'],
