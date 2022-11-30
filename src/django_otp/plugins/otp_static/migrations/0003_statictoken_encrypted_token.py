@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="statictoken",
             name="encrypted_token",
-            field=fernet_fields.fields.EncryptedCharField(max_length=250),
+            field=fernet_fields.fields.EncryptedCharField(max_length=250, default=""),
         ),
     ]
